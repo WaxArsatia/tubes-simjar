@@ -2,6 +2,26 @@ import unittest
 from pathlib import Path
 
 
+def make_valid_experiment_rows():
+    from scripts.run_experiments import BUFFER_SAMPLES, FIELDNAMES
+
+    rows = []
+    for buffer_packets in BUFFER_SAMPLES:
+        row = dict.fromkeys(FIELDNAMES, "0")
+        row["buffer_packets"] = str(buffer_packets)
+        row["tx_packets"] = "100"
+        row["rx_packets"] = "90"
+        row["lost_packets"] = "10"
+        row["queue_disc_drops"] = "5"
+        row["packet_loss_ratio_percent"] = "10.000000"
+        row["throughput_mbps"] = "1.500000"
+        row["average_delay_ms"] = "2.500000"
+        row["run_seed"] = "1"
+        row["flow_id"] = "1"
+        rows.append(row)
+    return rows
+
+
 class ExperimentScriptTests(unittest.TestCase):
     def test_buffer_samples_are_required_default_values(self):
         from scripts.run_experiments import BUFFER_SAMPLES
@@ -79,6 +99,69 @@ class ExperimentScriptTests(unittest.TestCase):
             rows.append(row)
 
         with self.assertRaisesRegex(ValueError, "queue_disc_drops"):
+            validate_rows(rows, repetitions=1)
+
+    def test_validate_rows_accepts_valid_default_buffer_rows(self):
+        from scripts.run_experiments import validate_rows
+
+        validate_rows(make_valid_experiment_rows(), repetitions=1)
+
+    def test_validate_rows_rejects_rx_packets_above_tx_packets(self):
+        from scripts.run_experiments import validate_rows
+
+        rows = make_valid_experiment_rows()
+        rows[0]["rx_packets"] = "101"
+
+        with self.assertRaisesRegex(ValueError, "rx_packets"):
+            validate_rows(rows, repetitions=1)
+
+    def test_validate_rows_rejects_wrong_lost_packet_count(self):
+        from scripts.run_experiments import validate_rows
+
+        rows = make_valid_experiment_rows()
+        rows[0]["lost_packets"] = "9"
+
+        with self.assertRaisesRegex(ValueError, "lost_packets"):
+            validate_rows(rows, repetitions=1)
+
+    def test_validate_rows_rejects_wrong_packet_loss_ratio(self):
+        from scripts.run_experiments import validate_rows
+
+        rows = make_valid_experiment_rows()
+        rows[0]["packet_loss_ratio_percent"] = "11.000000"
+
+        with self.assertRaisesRegex(ValueError, "packet_loss_ratio_percent"):
+            validate_rows(rows, repetitions=1)
+
+    def test_validate_rows_rejects_negative_throughput_or_delay(self):
+        from scripts.run_experiments import validate_rows
+
+        for field in ("throughput_mbps", "average_delay_ms"):
+            with self.subTest(field=field):
+                rows = make_valid_experiment_rows()
+                rows[0][field] = "-0.1"
+
+                with self.assertRaisesRegex(ValueError, field):
+                    validate_rows(rows, repetitions=1)
+
+    def test_validate_rows_rejects_non_finite_float_metrics(self):
+        from scripts.run_experiments import validate_rows
+
+        for value in ("nan", "inf", "-inf"):
+            with self.subTest(value=value):
+                rows = make_valid_experiment_rows()
+                rows[0]["throughput_mbps"] = value
+
+                with self.assertRaisesRegex(ValueError, "throughput_mbps"):
+                    validate_rows(rows, repetitions=1)
+
+    def test_validate_rows_rejects_duplicate_buffer_seed_pair(self):
+        from scripts.run_experiments import validate_rows
+
+        rows = make_valid_experiment_rows()
+        rows[1]["buffer_packets"] = rows[0]["buffer_packets"]
+
+        with self.assertRaisesRegex(ValueError, "Duplicate buffer/seed pair"):
             validate_rows(rows, repetitions=1)
 
     def test_validate_metric_variation_rejects_flat_metrics(self):

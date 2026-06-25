@@ -2,6 +2,7 @@
 import argparse
 import csv
 import io
+import math
 import subprocess
 import sys
 from pathlib import Path
@@ -44,26 +45,73 @@ def parse_simulation_csv(stdout: str) -> dict[str, str]:
     return rows[0]
 
 
+def parse_int_field(row: dict[str, str], field: str) -> int:
+    try:
+        return int(row[field])
+    except (KeyError, TypeError, ValueError) as exc:
+        raise ValueError(f"{field} must be an integer for row {row}") from exc
+
+
+def parse_float_field(row: dict[str, str], field: str) -> float:
+    try:
+        value = float(row[field])
+    except (KeyError, TypeError, ValueError) as exc:
+        raise ValueError(f"{field} must be a number for row {row}") from exc
+    if not math.isfinite(value):
+        raise ValueError(f"{field} must be a finite number for row {row}")
+    return value
+
+
 def validate_rows(rows: list[dict[str, str]], repetitions: int) -> None:
     expected_count = len(BUFFER_SAMPLES) * repetitions
     if len(rows) != expected_count:
         raise ValueError(f"Expected {expected_count} rows, got {len(rows)}")
 
     expected_pairs = {(buffer, seed) for buffer in BUFFER_SAMPLES for seed in range(1, repetitions + 1)}
-    actual_pairs = {(int(row["buffer_packets"]), int(row["run_seed"])) for row in rows}
-    if actual_pairs != expected_pairs:
-        raise ValueError(f"Unexpected buffer/seed pairs: {sorted(actual_pairs)}")
-
+    actual_pairs = set()
     for row in rows:
         missing = [field for field in FIELDNAMES if field not in row]
         if missing:
             raise ValueError(f"Row missing columns: {', '.join(missing)}")
-        if int(row["tx_packets"]) <= 0:
+
+        buffer_packets = parse_int_field(row, "buffer_packets")
+        run_seed = parse_int_field(row, "run_seed")
+        pair = (buffer_packets, run_seed)
+        if pair in actual_pairs:
+            raise ValueError(f"Duplicate buffer/seed pair: {pair}")
+        actual_pairs.add(pair)
+
+        tx_packets = parse_int_field(row, "tx_packets")
+        rx_packets = parse_int_field(row, "rx_packets")
+        lost_packets = parse_int_field(row, "lost_packets")
+        queue_disc_drops = parse_int_field(row, "queue_disc_drops")
+        packet_loss_ratio_percent = parse_float_field(row, "packet_loss_ratio_percent")
+        throughput_mbps = parse_float_field(row, "throughput_mbps")
+        average_delay_ms = parse_float_field(row, "average_delay_ms")
+        flow_id = parse_int_field(row, "flow_id")
+
+        if tx_packets <= 0:
             raise ValueError(f"tx_packets must be > 0 for row {row}")
-        if int(row["flow_id"]) <= 0:
-            raise ValueError(f"flow_id must be > 0 for row {row}")
-        if int(row["queue_disc_drops"]) < 0:
+        if rx_packets < 0 or rx_packets > tx_packets:
+            raise ValueError(f"rx_packets must be between 0 and tx_packets for row {row}")
+        if lost_packets != tx_packets - rx_packets:
+            raise ValueError(f"lost_packets must equal tx_packets - rx_packets for row {row}")
+        if queue_disc_drops < 0:
             raise ValueError(f"queue_disc_drops must be >= 0 for row {row}")
+        if packet_loss_ratio_percent < 0 or packet_loss_ratio_percent > 100:
+            raise ValueError(f"packet_loss_ratio_percent must be between 0 and 100 for row {row}")
+        expected_loss_ratio = lost_packets * 100 / tx_packets
+        if abs(packet_loss_ratio_percent - expected_loss_ratio) > 1e-4:
+            raise ValueError(f"packet_loss_ratio_percent does not match packet counts for row {row}")
+        if throughput_mbps < 0:
+            raise ValueError(f"throughput_mbps must be >= 0 for row {row}")
+        if average_delay_ms < 0:
+            raise ValueError(f"average_delay_ms must be >= 0 for row {row}")
+        if flow_id <= 0:
+            raise ValueError(f"flow_id must be > 0 for row {row}")
+
+    if actual_pairs != expected_pairs:
+        raise ValueError(f"Unexpected buffer/seed pairs: {sorted(actual_pairs)}")
 
 
 def validate_metric_variation(rows: list[dict[str, str]], metric_names: list[str]) -> None:
