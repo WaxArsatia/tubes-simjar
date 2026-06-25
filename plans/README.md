@@ -10,7 +10,7 @@ Execute in the order below unless dependencies say otherwise. Each executor must
 | ---- | --------------------------------------------------------------- | -------- | ------ | ---------- | ------ |
 | 001  | Aggregate repeated-seed plot data before graphing               | P1       | M      | -          | DONE   |
 | 002  | Enforce CSV metric invariants in experiment validation          | P1       | M      | -          | DONE   |
-| 003  | Reject inconsistent simulation timing parameters                | P2       | S      | -          | TODO   |
+| 003  | Reject inconsistent simulation timing parameters                | P2       | S      | -          | DONE   |
 | 004  | Add reproducible Python and generated-artifact tooling baseline | P2       | S      | -          | TODO   |
 
 ## Dependency notes
