@@ -29,6 +29,17 @@ Traffic default dibuat mild congestion agar efek ukuran buffer terlihat:
 - Kapasitas bottleneck `R4 -> H4`: `2Mbps`.
 - Traffic berhenti pada `19s`, sedangkan simulasi berhenti pada `25s` agar buffer besar punya waktu drain sebelum statistik final.
 
+## Prasyarat
+
+- Python 3.
+- Dependensi Python terpasang:
+
+```bash
+python -m pip install -r requirements.txt
+```
+
+- `ns3-compile` tersedia di `PATH`.
+
 ## Cara Menjalankan
 
 Compile saja:
