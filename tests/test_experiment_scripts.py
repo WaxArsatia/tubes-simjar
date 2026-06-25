@@ -245,6 +245,26 @@ class ExperimentScriptTests(unittest.TestCase):
             self.assertTrue(output_path.exists())
             self.assertGreater(output_path.stat().st_size, 0)
 
+    def test_topology_edges_include_r4_to_h4_bottleneck(self):
+        from scripts.plot_topology import TOPOLOGY_EDGES
+
+        bottleneck_edges = [edge for edge in TOPOLOGY_EDGES if edge["kind"] == "bottleneck"]
+
+        self.assertEqual(len(bottleneck_edges), 1)
+        self.assertEqual(bottleneck_edges[0]["source"], "R4")
+        self.assertEqual(bottleneck_edges[0]["target"], "H4")
+        self.assertIn("2Mbps", bottleneck_edges[0]["label"])
+
+    def test_plot_topology_writes_png_file(self):
+        from scripts.plot_topology import plot_topology
+
+        with TemporaryDirectory() as temp_dir:
+            output_path = Path(temp_dir) / "network_topology.png"
+            plot_topology(output_path, buffer_packets=20)
+
+            self.assertTrue(output_path.exists())
+            self.assertGreater(output_path.stat().st_size, 0)
+
 
 if __name__ == "__main__":
     unittest.main()

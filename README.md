@@ -16,11 +16,13 @@ Analisis Pengaruh Variasi Ukuran Queue Buffer terhadap Packet Loss, Throughput, 
 |   `-- queue_buffer_qos.cc
 |-- scripts/
 |   |-- run_experiments.py
-|   `-- plot_results.py
+|   |-- plot_results.py
+|   `-- plot_topology.py
 |-- tests/
 |   `-- test_experiment_scripts.py
 `-- results/
     |-- qos_results.csv
+    |-- network_topology.png
     |-- throughput_vs_buffer.png
     |-- throughput_vs_buffer_bar.png
     |-- delay_vs_buffer.png
@@ -41,11 +43,15 @@ Analisis Pengaruh Variasi Ukuran Queue Buffer terhadap Packet Loss, Throughput, 
 
 `scripts/plot_results.py` membaca CSV dan membuat sepuluh grafik PNG: lima line chart dan lima bar chart. Jika eksperimen dijalankan dengan beberapa seed, nilai grafik dirata-ratakan per ukuran buffer.
 
-`tests/test_experiment_scripts.py` menguji daftar sampel buffer, pembentukan command, parsing CSV, validasi invariant metrik, validasi kolom `queue_disc_drops`, penolakan metrik flat, dan agregasi plot.
+`scripts/plot_topology.py` membuat visualisasi PNG topologi existing ke `results/network_topology.png`.
+
+`tests/test_experiment_scripts.py` menguji daftar sampel buffer, pembentukan command, parsing CSV, validasi invariant metrik, validasi kolom `queue_disc_drops`, penolakan metrik flat, agregasi plot, dan pembuatan visualisasi topologi.
 
 ## Topologi
 
 Simulasi memakai 5 router dan 5 host.
+
+![Visualisasi topologi jaringan existing](results/network_topology.png)
 
 Host terhubung ke router masing-masing:
 
@@ -180,6 +186,12 @@ Buat ulang grafik dari CSV yang sudah ada:
 python scripts/plot_results.py
 ```
 
+Buat ulang visualisasi topologi:
+
+```bash
+python scripts/plot_topology.py
+```
+
 ## Opsi binary simulasi
 
 Binary `build/queue_buffer_qos` menerima opsi berikut:
@@ -218,6 +230,10 @@ Grafik bar chart yang dibuat:
 - `results/queue_disc_drops_vs_buffer_bar.png`
 
 Grafik memakai rata-rata per `buffer_packets` jika CSV berisi lebih dari satu `run_seed` untuk ukuran buffer yang sama.
+
+Visualisasi topologi:
+
+- `results/network_topology.png`
 
 ## Hasil saat ini
 
