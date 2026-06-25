@@ -32,9 +32,9 @@ Analisis Pengaruh Variasi Ukuran Queue Buffer terhadap Packet Loss, Throughput, 
 
 `src/queue_buffer_qos.cc` membangun topologi, memasang traffic UDP CBR, memasang queue disc bottleneck, menjalankan FlowMonitor, lalu menulis satu baris CSV untuk satu ukuran buffer.
 
-`scripts/run_experiments.py` mengompilasi source NS-3 dengan `ns3-compile`, menjalankan semua sampel buffer, memvalidasi hasil, menulis `results/qos_results.csv`, lalu membuat grafik kecuali opsi `--skip-plots` dipakai.
+`scripts/run_experiments.py` mengompilasi source NS-3 dengan `ns3-compile`, menjalankan semua sampel buffer untuk jumlah seed yang diminta, memvalidasi hasil, menulis `results/qos_results.csv`, lalu membuat grafik kecuali opsi `--skip-plots` dipakai.
 
-`scripts/plot_results.py` membaca CSV dan membuat lima grafik PNG. Jika eksperimen dijalankan dengan beberapa seed, nilai pada grafik dirata-ratakan per ukuran buffer.
+`scripts/plot_results.py` membaca CSV dan membuat lima grafik PNG. Jika eksperimen dijalankan dengan beberapa seed, nilai grafik dirata-ratakan per ukuran buffer.
 
 `tests/test_experiment_scripts.py` menguji daftar sampel buffer, pembentukan command, parsing CSV, validasi invariant metrik, validasi kolom `queue_disc_drops`, penolakan metrik flat, dan agregasi plot.
 
@@ -149,6 +149,8 @@ Jalankan semua sampel default dan buat grafik:
 python scripts/run_experiments.py
 ```
 
+Perintah default menjalankan 1 seed per ukuran buffer dan menghasilkan 10 baris data.
+
 Jalankan beberapa seed per ukuran buffer:
 
 ```bash
@@ -177,14 +179,14 @@ python scripts/plot_results.py
 
 Binary `build/queue_buffer_qos` menerima opsi berikut:
 
-| Opsi                         |   Default | Keterangan                                                           |
-| ---------------------------- | --------: | -------------------------------------------------------------------- | ------------------------------------ |
-| `--bufferPackets=<N>`        |      `10` | Ukuran `FifoQueueDisc` dalam packet. Nilai harus lebih besar dari 0. |
-| `--runSeed=<N>`              |       `1` | Run number NS-3 untuk repetisi yang reproducible.                    |
-| `--csvHeader=<true           |   false>` | `false`                                                              | Cetak header CSV sebelum baris data. |
-| `--simulationStop=<seconds>` |      `25` | Waktu akhir simulasi. Harus lebih besar dari `19s`.                  |
-| `--mainRate=<rate>`          |   `1Mbps` | Rate UDP CBR untuk flow utama `H0 -> H4`.                            |
-| `--backgroundRate=<rate>`    | `0.5Mbps` | Rate setiap background flow menuju `H4`.                             |
+| Opsi | Default | Keterangan |
+| --- | ---: | --- |
+| `--bufferPackets=<N>` | `10` | Ukuran `FifoQueueDisc` dalam packet. Nilai harus lebih besar dari 0. |
+| `--runSeed=<N>` | `1` | Run number NS-3 untuk repetisi yang reproducible. |
+| `--csvHeader=<true|false>` | `false` | Cetak header CSV sebelum baris data. |
+| `--simulationStop=<seconds>` | `25` | Waktu akhir simulasi. Harus lebih besar dari `19s`. |
+| `--mainRate=<rate>` | `1Mbps` | Rate UDP CBR untuk flow utama `H0 -> H4`. |
+| `--backgroundRate=<rate>` | `0.5Mbps` | Rate setiap background flow menuju `H4`. |
 
 ## Output
 
@@ -202,16 +204,24 @@ Grafik yang dibuat:
 - `results/lost_packets_vs_buffer.png`
 - `results/queue_disc_drops_vs_buffer.png`
 
+Grafik memakai rata-rata per `buffer_packets` jika CSV berisi lebih dari satu `run_seed` untuk ukuran buffer yang sama.
+
 ## Hasil saat ini
 
-Output default yang tersimpan di `results/qos_results.csv` berisi 10 baris untuk seluruh sampel buffer. Ringkasan nilai ekstrem:
+Output yang tersimpan di `results/qos_results.csv` dibuat dengan:
+
+```bash
+python scripts/run_experiments.py --repetitions 10
+```
+
+CSV saat ini berisi 100 baris: 10 ukuran buffer dikalikan 10 seed. Grafik di `results/` sudah dibuat ulang dari CSV tersebut dan memakai rata-rata per ukuran buffer. Ringkasan nilai rata-rata ekstrem:
 
 | Buffer | Queue disc drops | Lost packets | Packet loss ratio |      Throughput |  Delay rata-rata |
 | -----: | ---------------: | -----------: | ----------------: | --------------: | ---------------: |
 |    `1` |           `1222` |        `492` |      `22.394174%` | `0.797182 Mbps` |   `26.381596 ms` |
 | `1000` |            `223` |         `90` |       `4.096495%` | `0.985140 Mbps` | `2441.509905 ms` |
 
-Pada output saat ini, buffer yang lebih besar menurunkan queue disc drops dan packet loss, sedikit menaikkan throughput, tetapi menaikkan delay rata-rata. Pola ini sesuai dengan trade-off buffer: loss turun karena antrean lebih besar, sedangkan delay naik karena paket menunggu lebih lama.
+Pada output 10 repetisi saat ini, setiap seed menghasilkan nilai yang sama karena traffic memakai konstanta dan tidak ada proses acak yang memengaruhi pola paket. Buffer yang lebih besar menurunkan queue disc drops dan packet loss, sedikit menaikkan throughput, tetapi menaikkan delay rata-rata. Pola ini sesuai dengan trade-off buffer: loss turun karena antrean lebih besar, sedangkan delay naik karena paket menunggu lebih lama.
 
 ## Validasi
 
