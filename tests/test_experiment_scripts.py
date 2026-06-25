@@ -96,6 +96,50 @@ class ExperimentScriptTests(unittest.TestCase):
         with self.assertRaisesRegex(ValueError, "flat"):
             validate_metric_variation(rows, ["queue_disc_drops"])
 
+    def test_aggregate_rows_by_buffer_returns_sorted_unique_buffers(self):
+        from scripts.plot_results import aggregate_rows_by_buffer
+
+        rows = [
+            {"buffer_packets": "5", "throughput_mbps": "10.0"},
+            {"buffer_packets": "1", "throughput_mbps": "3.0"},
+        ]
+
+        buffers, values = aggregate_rows_by_buffer(rows, "throughput_mbps")
+
+        self.assertEqual(buffers, [1, 5])
+        self.assertEqual(values, [3.0, 10.0])
+
+    def test_aggregate_rows_by_buffer_averages_duplicate_buffers(self):
+        from scripts.plot_results import aggregate_rows_by_buffer
+
+        rows = [
+            {"buffer_packets": "5", "average_delay_ms": "10.0"},
+            {"buffer_packets": "1", "average_delay_ms": "2.0"},
+            {"buffer_packets": "5", "average_delay_ms": "14.0"},
+            {"buffer_packets": "1", "average_delay_ms": "4.0"},
+        ]
+
+        buffers, values = aggregate_rows_by_buffer(rows, "average_delay_ms")
+
+        self.assertEqual(buffers, [1, 5])
+        self.assertEqual(values, [3.0, 12.0])
+
+    def test_aggregate_rows_by_buffer_rejects_invalid_metric_values(self):
+        from scripts.plot_results import aggregate_rows_by_buffer
+
+        rows = [{"buffer_packets": "1", "average_delay_ms": "not-a-number"}]
+
+        with self.assertRaisesRegex(ValueError, "average_delay_ms"):
+            aggregate_rows_by_buffer(rows, "average_delay_ms")
+
+    def test_aggregate_rows_by_buffer_rejects_invalid_buffer_values(self):
+        from scripts.plot_results import aggregate_rows_by_buffer
+
+        rows = [{"buffer_packets": "not-a-buffer", "average_delay_ms": "1.0"}]
+
+        with self.assertRaisesRegex(ValueError, "buffer_packets"):
+            aggregate_rows_by_buffer(rows, "average_delay_ms")
+
 
 if __name__ == "__main__":
     unittest.main()

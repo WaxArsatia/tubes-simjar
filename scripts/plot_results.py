@@ -13,9 +13,29 @@ def read_rows(csv_path: Path) -> list[dict[str, str]]:
         return list(csv.DictReader(handle))
 
 
+def aggregate_rows_by_buffer(rows: list[dict[str, str]], y_column: str) -> tuple[list[int], list[float]]:
+    values_by_buffer: dict[int, list[float]] = {}
+
+    for row in rows:
+        try:
+            buffer_packets = int(row["buffer_packets"])
+        except (KeyError, ValueError) as exc:
+            raise ValueError(f"Could not parse buffer_packets value: {row.get('buffer_packets')!r}") from exc
+
+        try:
+            metric_value = float(row[y_column])
+        except (KeyError, ValueError) as exc:
+            raise ValueError(f"Could not parse {y_column} value: {row.get(y_column)!r}") from exc
+
+        values_by_buffer.setdefault(buffer_packets, []).append(metric_value)
+
+    buffers = sorted(values_by_buffer)
+    averages = [sum(values_by_buffer[buffer]) / len(values_by_buffer[buffer]) for buffer in buffers]
+    return buffers, averages
+
+
 def plot_metric(rows: list[dict[str, str]], y_column: str, y_label: str, title: str, output_path: Path) -> None:
-    x_values = [int(row["buffer_packets"]) for row in rows]
-    y_values = [float(row[y_column]) for row in rows]
+    x_values, y_values = aggregate_rows_by_buffer(rows, y_column)
 
     fig, ax = plt.subplots(figsize=(8, 5))
     ax.plot(x_values, y_values, marker="o", linewidth=2)
