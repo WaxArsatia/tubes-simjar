@@ -22,10 +22,15 @@ Analisis Pengaruh Variasi Ukuran Queue Buffer terhadap Packet Loss, Throughput, 
 `-- results/
     |-- qos_results.csv
     |-- throughput_vs_buffer.png
+    |-- throughput_vs_buffer_bar.png
     |-- delay_vs_buffer.png
+    |-- delay_vs_buffer_bar.png
     |-- packet_loss_ratio_vs_buffer.png
+    |-- packet_loss_ratio_vs_buffer_bar.png
     |-- lost_packets_vs_buffer.png
-    `-- queue_disc_drops_vs_buffer.png
+    |-- lost_packets_vs_buffer_bar.png
+    |-- queue_disc_drops_vs_buffer.png
+    `-- queue_disc_drops_vs_buffer_bar.png
 ```
 
 ## Komponen
@@ -34,7 +39,7 @@ Analisis Pengaruh Variasi Ukuran Queue Buffer terhadap Packet Loss, Throughput, 
 
 `scripts/run_experiments.py` mengompilasi source NS-3 dengan `ns3-compile`, menjalankan semua sampel buffer untuk jumlah seed yang diminta, memvalidasi hasil, menulis `results/qos_results.csv`, lalu membuat grafik kecuali opsi `--skip-plots` dipakai.
 
-`scripts/plot_results.py` membaca CSV dan membuat lima grafik PNG. Jika eksperimen dijalankan dengan beberapa seed, nilai grafik dirata-ratakan per ukuran buffer.
+`scripts/plot_results.py` membaca CSV dan membuat sepuluh grafik PNG: lima line chart dan lima bar chart. Jika eksperimen dijalankan dengan beberapa seed, nilai grafik dirata-ratakan per ukuran buffer.
 
 `tests/test_experiment_scripts.py` menguji daftar sampel buffer, pembentukan command, parsing CSV, validasi invariant metrik, validasi kolom `queue_disc_drops`, penolakan metrik flat, dan agregasi plot.
 
