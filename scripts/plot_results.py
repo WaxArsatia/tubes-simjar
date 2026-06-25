@@ -49,6 +49,22 @@ def plot_metric(rows: list[dict[str, str]], y_column: str, y_label: str, title: 
     plt.close(fig)
 
 
+def plot_bar_metric(
+    rows: list[dict[str, str]], y_column: str, y_label: str, title: str, output_path: Path
+) -> None:
+    x_values, y_values = aggregate_rows_by_buffer(rows, y_column)
+
+    fig, ax = plt.subplots(figsize=(8, 5))
+    ax.bar([str(value) for value in x_values], y_values)
+    ax.set_xlabel("Ukuran Queue Buffer (packet)")
+    ax.set_ylabel(y_label)
+    ax.set_title(f"{title} (Bar Chart)")
+    ax.grid(True, axis="y", linestyle="--", alpha=0.5)
+    fig.tight_layout()
+    fig.savefig(output_path, dpi=160)
+    plt.close(fig)
+
+
 def main() -> int:
     root = Path(__file__).resolve().parents[1]
     results_dir = root / "results"
@@ -63,12 +79,26 @@ def main() -> int:
         "Throughput vs Ukuran Queue Buffer",
         results_dir / "throughput_vs_buffer.png",
     )
+    plot_bar_metric(
+        rows,
+        "throughput_mbps",
+        "Throughput (Mbps)",
+        "Throughput vs Ukuran Queue Buffer",
+        results_dir / "throughput_vs_buffer_bar.png",
+    )
     plot_metric(
         rows,
         "average_delay_ms",
         "Delay rata-rata (ms)",
         "Delay vs Ukuran Queue Buffer",
         results_dir / "delay_vs_buffer.png",
+    )
+    plot_bar_metric(
+        rows,
+        "average_delay_ms",
+        "Delay rata-rata (ms)",
+        "Delay vs Ukuran Queue Buffer",
+        results_dir / "delay_vs_buffer_bar.png",
     )
     plot_metric(
         rows,
@@ -77,6 +107,13 @@ def main() -> int:
         "Packet Loss Ratio vs Ukuran Queue Buffer",
         results_dir / "packet_loss_ratio_vs_buffer.png",
     )
+    plot_bar_metric(
+        rows,
+        "packet_loss_ratio_percent",
+        "Packet loss ratio (%)",
+        "Packet Loss Ratio vs Ukuran Queue Buffer",
+        results_dir / "packet_loss_ratio_vs_buffer_bar.png",
+    )
     plot_metric(
         rows,
         "lost_packets",
@@ -84,12 +121,26 @@ def main() -> int:
         "Packet Loss Count vs Ukuran Queue Buffer",
         results_dir / "lost_packets_vs_buffer.png",
     )
+    plot_bar_metric(
+        rows,
+        "lost_packets",
+        "Packet loss (packet)",
+        "Packet Loss Count vs Ukuran Queue Buffer",
+        results_dir / "lost_packets_vs_buffer_bar.png",
+    )
     plot_metric(
         rows,
         "queue_disc_drops",
         "Queue disc drops (packet)",
         "Queue Disc Drops vs Ukuran Queue Buffer",
         results_dir / "queue_disc_drops_vs_buffer.png",
+    )
+    plot_bar_metric(
+        rows,
+        "queue_disc_drops",
+        "Queue disc drops (packet)",
+        "Queue Disc Drops vs Ukuran Queue Buffer",
+        results_dir / "queue_disc_drops_vs_buffer_bar.png",
     )
     return 0
 

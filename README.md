@@ -196,13 +196,21 @@ Binary `build/queue_buffer_qos` menerima opsi berikut:
 buffer_packets,tx_packets,rx_packets,lost_packets,queue_disc_drops,packet_loss_ratio_percent,throughput_mbps,average_delay_ms,run_seed,flow_id
 ```
 
-Grafik yang dibuat:
+Grafik line chart yang dibuat:
 
 - `results/throughput_vs_buffer.png`
 - `results/delay_vs_buffer.png`
 - `results/packet_loss_ratio_vs_buffer.png`
 - `results/lost_packets_vs_buffer.png`
 - `results/queue_disc_drops_vs_buffer.png`
+
+Grafik bar chart yang dibuat:
+
+- `results/throughput_vs_buffer_bar.png`
+- `results/delay_vs_buffer_bar.png`
+- `results/packet_loss_ratio_vs_buffer_bar.png`
+- `results/lost_packets_vs_buffer_bar.png`
+- `results/queue_disc_drops_vs_buffer_bar.png`
 
 Grafik memakai rata-rata per `buffer_packets` jika CSV berisi lebih dari satu `run_seed` untuk ukuran buffer yang sama.
 
@@ -255,3 +263,29 @@ Validasi di runner akan gagal jika:
 Throughput dihitung dari byte yang diterima selama durasi traffic aktif, yaitu `18s`, bukan dari total durasi simulasi `25s`. Sisa waktu setelah `19s` dipakai untuk memberi kesempatan antrean besar mengosongkan paket sebelum statistik akhir diambil.
 
 Jika traffic rate atau queue discipline diubah, ulangi verifikasi penuh. Untuk mempertahankan bentuk eksperimen saat ini, offered load perlu tetap sedikit lebih besar dari kapasitas bottleneck `2Mbps` agar efek buffer tidak hilang atau menjadi terlalu ekstrem.
+
+## Visualisasi hasil
+
+### Line chart
+
+![Throughput vs Ukuran Queue Buffer](results/throughput_vs_buffer.png)
+
+![Delay vs Ukuran Queue Buffer](results/delay_vs_buffer.png)
+
+![Packet Loss Ratio vs Ukuran Queue Buffer](results/packet_loss_ratio_vs_buffer.png)
+
+![Packet Loss Count vs Ukuran Queue Buffer](results/lost_packets_vs_buffer.png)
+
+![Queue Disc Drops vs Ukuran Queue Buffer](results/queue_disc_drops_vs_buffer.png)
+
+### Bar chart
+
+![Throughput vs Ukuran Queue Buffer Bar Chart](results/throughput_vs_buffer_bar.png)
+
+![Delay vs Ukuran Queue Buffer Bar Chart](results/delay_vs_buffer_bar.png)
+
+![Packet Loss Ratio vs Ukuran Queue Buffer Bar Chart](results/packet_loss_ratio_vs_buffer_bar.png)
+
+![Packet Loss Count vs Ukuran Queue Buffer Bar Chart](results/lost_packets_vs_buffer_bar.png)
+
+![Queue Disc Drops vs Ukuran Queue Buffer Bar Chart](results/queue_disc_drops_vs_buffer_bar.png)

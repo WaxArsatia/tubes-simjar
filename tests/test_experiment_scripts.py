@@ -1,5 +1,6 @@
 import unittest
 from pathlib import Path
+from tempfile import TemporaryDirectory
 
 
 def make_valid_experiment_rows():
@@ -222,6 +223,27 @@ class ExperimentScriptTests(unittest.TestCase):
 
         with self.assertRaisesRegex(ValueError, "buffer_packets"):
             aggregate_rows_by_buffer(rows, "average_delay_ms")
+
+    def test_plot_bar_metric_writes_png_file(self):
+        from scripts.plot_results import plot_bar_metric
+
+        rows = [
+            {"buffer_packets": "1", "throughput_mbps": "3.0"},
+            {"buffer_packets": "5", "throughput_mbps": "10.0"},
+        ]
+
+        with TemporaryDirectory() as temp_dir:
+            output_path = Path(temp_dir) / "throughput_vs_buffer_bar.png"
+            plot_bar_metric(
+                rows,
+                "throughput_mbps",
+                "Throughput (Mbps)",
+                "Throughput vs Ukuran Queue Buffer",
+                output_path,
+            )
+
+            self.assertTrue(output_path.exists())
+            self.assertGreater(output_path.stat().st_size, 0)
 
 
 if __name__ == "__main__":
