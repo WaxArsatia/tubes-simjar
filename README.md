@@ -43,6 +43,8 @@ Jalankan satu skenario:
 ./build/queue_buffer_qos --bufferPackets=10 --runSeed=1 --csvHeader=true
 ```
 
+Jika memakai `--simulationStop`, nilainya harus lebih besar dari waktu traffic stop tetap `19s`.
+
 Jalankan semua eksperimen dan grafik:
 
 ```bash

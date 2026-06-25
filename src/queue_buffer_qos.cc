@@ -76,6 +76,16 @@ main(int argc, char* argv[])
         std::cerr << "bufferPackets must be greater than zero\n";
         return 2;
     }
+    if (trafficStop <= trafficStart)
+    {
+        std::cerr << "trafficStop must be greater than trafficStart\n";
+        return 5;
+    }
+    if (simulationStop <= trafficStop)
+    {
+        std::cerr << "simulationStop must be greater than trafficStop so all offered traffic is measured\n";
+        return 5;
+    }
 
     SeedManager::SetSeed(12345);
     SeedManager::SetRun(runSeed);
