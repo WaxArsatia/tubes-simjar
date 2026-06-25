@@ -179,14 +179,14 @@ python scripts/plot_results.py
 
 Binary `build/queue_buffer_qos` menerima opsi berikut:
 
-| Opsi | Default | Keterangan |
-| --- | ---: | --- |
-| `--bufferPackets=<N>` | `10` | Ukuran `FifoQueueDisc` dalam packet. Nilai harus lebih besar dari 0. |
-| `--runSeed=<N>` | `1` | Run number NS-3 untuk repetisi yang reproducible. |
-| `--csvHeader=<true|false>` | `false` | Cetak header CSV sebelum baris data. |
-| `--simulationStop=<seconds>` | `25` | Waktu akhir simulasi. Harus lebih besar dari `19s`. |
-| `--mainRate=<rate>` | `1Mbps` | Rate UDP CBR untuk flow utama `H0 -> H4`. |
-| `--backgroundRate=<rate>` | `0.5Mbps` | Rate setiap background flow menuju `H4`. |
+| Opsi                         |   Default | Keterangan                                                           |
+| ---------------------------- | --------: | -------------------------------------------------------------------- |
+| `--bufferPackets=<N>`        |      `10` | Ukuran `FifoQueueDisc` dalam packet. Nilai harus lebih besar dari 0. |
+| `--runSeed=<N>`              |       `1` | Run number NS-3 untuk repetisi yang reproducible.                    |
+| `--csvHeader=<true\|false>`  |   `false` | Cetak header CSV sebelum baris data.                                 |
+| `--simulationStop=<seconds>` |      `25` | Waktu akhir simulasi. Harus lebih besar dari `19s`.                  |
+| `--mainRate=<rate>`          |   `1Mbps` | Rate UDP CBR untuk flow utama `H0 -> H4`.                            |
+| `--backgroundRate=<rate>`    | `0.5Mbps` | Rate setiap background flow menuju `H4`.                             |
 
 ## Output
 
